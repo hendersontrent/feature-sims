@@ -14,17 +14,37 @@ source("setup.R") # This automatically loads the simulation function from the "/
 
 #----------- Simulate the processes -------------
 
+gauss_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "Gaussian")
+arima_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "ARIMA")
+sine_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "Sinusoidal")
 
+#sims <- bind_rows(gauss_dat, arima_dat, sine_dat)
+#save(sims, file = "data/sims.Rda") # Store as .Rda in case of any crashes
+#rm(gauss_dat, arima_dat, sine_dat) # Remove older objects from memory to save space
 
 #----------- Calculate features -----------------
 
+calculate_comptimes <- function(){
+  
+  gauss_22 <- feature_calculation_engine(data = gauss_dat, feature_set = "catch22")
+  gauss_feasts <- feature_calculation_engine(data = gauss_dat, feature_set = "feasts")
+  gauss_tsfeatures <- feature_calculation_engine(data = gauss_dat, feature_set = "tsfeatures")
+  arima_22 <- feature_calculation_engine(data = arima_dat, feature_set = "catch22")
+  arima_feasts <- feature_calculation_engine(data = arima_dat, feature_set = "feasts")
+  arima_tsfeatures <- feature_calculation_engine(data = arima_dat, feature_set = "tsfeatures")
+  sine_22 <- feature_calculation_engine(data = sine_dat, feature_set = "catch22")
+  sine_feasts <- feature_calculation_engine(data = sine_dat, feature_set = "feasts")
+  sine_tsfeatures <- feature_calculation_engine(data = sine_dat, feature_set = "tsfeatures")
+  
+  outs <- bind_rows(gauss_22, gauss_feasts, gauss_tsfeatures,
+                    arima_22, arima_feasts, arima_tsfeatures,
+                    sine_22, sine_feasts, sine_tsfeatures)
+  
+  return(outs)
+}
 
-
-#----------- Store as an .Rda -------------------
-
-# This is just a safety against potential local machine crashes during calculations
-
-save(outs, "output/calculated_features.Rda")
+comptimes <- calculate_comptimes()
+save(comptimes, "data/comptimes.Rda") # Store as .Rda
 
 #----------- Visualise performance --------------
 

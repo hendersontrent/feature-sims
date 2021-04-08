@@ -12,13 +12,16 @@ library(dplyr)
 library(magrittr)
 library(ggplot2)
 library(scales)
+library(catch22) # devtools::install_github("hendersontrent/catch22")
 library(theft) # devtools::install_github("hendersontrent/theft")
+library(microbenchmark)
 
 # Create important folders if none exist:
 
 if(!dir.exists('simulations')) dir.create('simulations')
 if(!dir.exists('R')) dir.create('R')
 if(!dir.exists('output')) dir.create('output')
+if(!dir.exists('data')) dir.create('data')
 
 # Load any functions written for this project
 
