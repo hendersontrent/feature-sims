@@ -17,6 +17,7 @@ library(catch22) # devtools::install_github("hendersontrent/catch22")
 library(theft) # devtools::install_github("hendersontrent/theft")
 library(microbenchmark)
 library(Cairo)
+library(caret)
 
 # Create important folders if none exist:
 
