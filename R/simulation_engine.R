@@ -22,7 +22,7 @@
 #' 
 
 simulation_engine <- function(min_length = 1000, max_length = 10000, num_ts = 100,
-                              process = c("Gaussian", "Sinusoidal", "ARIMA")){
+                              process = c("Gaussian", "Sinusoidal", "ARIMA", "CumSum")){
   
   # Make Gaussian the default
   
@@ -43,14 +43,14 @@ simulation_engine <- function(min_length = 1000, max_length = 10000, num_ts = 10
   # Process parameter
   
   '%ni%' <- Negate('%in%')
-  the_processes <- c("Gaussian", "Sinusoidal", "ARIMA")
+  the_processes <- c("Gaussian", "Sinusoidal", "ARIMA", "CumSum")
   
   if(process %ni% the_processes){
-    stop("process argument should be a single string specification of either 'Gaussian', 'Sinusoidal' or 'ARIMA'.")
+    stop("process argument should be a single string specification of either 'Gaussian', 'Sinusoidal', 'ARIMA', or 'CumSum'.")
   }
   
   if(length(process) > 1){
-    stop("process argument should be a single string specification of either 'Gaussian', 'Sinusoidal' or 'ARIMA'.")
+    stop("process argument should be a single string specification of either 'Gaussian', 'Sinusoidal', 'ARIMA', or 'CumSum'.")
   }
   
   #---------- Main calcs ---------------
@@ -121,6 +121,23 @@ simulation_engine <- function(min_length = 1000, max_length = 10000, num_ts = 10
         mutate(timepoint = row_number()) %>%
         mutate(ts_length = i) %>%
         mutate(process = "ARIMA")
+      
+      storage[[i]] <- tmp
+    }
+    outData <- data.table::rbindlist(storage, use.names = TRUE)
+  }
+  
+  #---------
+  # CumSum
+  #---------
+  
+  if(process == "CumSum"){
+    for(i in use_lengths){
+      
+      tmp <- data.frame(values = cumsum(rnorm(i, mean = 0, sd = 1))) %>%
+        mutate(timepoint = row_number()) %>%
+        mutate(ts_length = i) %>%
+        mutate(process = "CumSum")
       
       storage[[i]] <- tmp
     }
