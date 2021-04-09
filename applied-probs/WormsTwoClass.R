@@ -42,12 +42,6 @@ test_feats <- calculate_features(data = test, id_var = "id", time_var = "timepoi
 
 # Normalisation
 
-train_norm <- normalise_feature_frame(data = train_feats, names_var = "names", values_var = "values",
-                                      method = "z-score")
-
-test_norm <- normalise_feature_frame(data = test_feats, names_var = "names", values_var = "values",
-                                     method = "z-score")
-
 train_norm1 <- train_feats %>%
   dplyr::group_by(names) %>%
   dplyr::mutate(values = (values-mean(values, na.rm = TRUE))/sd(values, na.rm = TRUE)) %>%
@@ -99,22 +93,46 @@ test_wide <- test_norm1 %>%
 
 # ----------------------- Classification -----------------
 
-# Fit a random forest
+# Set up 10-fold cross validation procedure with 3 repeats
+
+train_control <- trainControl(method = 'repeatedcv', 
+                        number = 10, 
+                        repeats = 3, 
+                        search = 'grid',
+                        )
+
+# Define some mtry parameters to fit over
+
+tunegrid <- expand.grid(.mtry = (1:15))
+
+# Train RandomForest model
 
 set.seed(123)
 
-m1 <- randomForest::randomForest(formula = target ~ .,
-                 data = train_wide,
-                 importance = TRUE)
+rf.mod <- train(
+  x = train_wide[,-1],
+  y = train_wide$target,
+  ntree = 1000,
+  method = "rf",
+  metric = "Accuracy",
+  tuneGrid = tunegrid,
+  trControl = train_control
+)
 
-# Variable importance plot
+# Retrieve classification accuracy on test set
 
-Cairo::CairoPNG("output/varimp.png", 800, 600)
-randomForest::varImpPlot(m1)
+y_pred_rf <- predict(rf.mod, newdata = test_wide[,-1])
+tab_rf <- table(test_wide$target, y_pred_rf)
+caret::confusionMatrix(tab_rf)
+
+# Make variable importance plot
+
+CairoPNG("output/varimp.png", 800, 600)
+plot(varImp(rf.mod))
 dev.off()
 
-# Classification accuracy
+# Plot grid search parameters
 
-y_pred <- predict(m1, newdata = test_wide)
-a <- table(test_wide$target, y_pred)
-caret::confusionMatrix(a)
+CairoPNG("output/gridsearch.png", 800, 600)
+plot(rf.mod)
+dev.off()
