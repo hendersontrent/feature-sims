@@ -17,10 +17,7 @@ source("setup.R") # This automatically loads the simulation functions from the "
 gauss_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "Gaussian")
 arima_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "ARIMA")
 sine_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "Sinusoidal")
-
-#sims <- bind_rows(gauss_dat, arima_dat, sine_dat)
-#save(sims, file = "data/sims.Rda") # Store as .Rda in case of any crashes
-#rm(gauss_dat, arima_dat, sine_dat) # Remove older objects from memory to save space
+cs_dat <- simulation_engine(min_length = 100, max_length = 10000, num_ts = 50, process = "CumSum")
 
 #----------- Calculate features -----------------
 
@@ -35,16 +32,20 @@ calculate_comptimes <- function(){
   sine_22 <- feature_calculation_engine(data = sine_dat, feature_set = "catch22")
   sine_feasts <- feature_calculation_engine(data = sine_dat, feature_set = "feasts")
   sine_tsfeatures <- feature_calculation_engine(data = sine_dat, feature_set = "tsfeatures")
+  cs_22 <- feature_calculation_engine(data = cs_dat, feature_set = "catch22")
+  cs_feasts <- feature_calculation_engine(data = cs_dat, feature_set = "feasts")
+  cs_tsfeatures <- feature_calculation_engine(data = cs_dat, feature_set = "tsfeatures")
   
   outs <- bind_rows(gauss_22, gauss_feasts, gauss_tsfeatures,
                     arima_22, arima_feasts, arima_tsfeatures,
-                    sine_22, sine_feasts, sine_tsfeatures)
+                    sine_22, sine_feasts, sine_tsfeatures,
+                    cs_22, cs_feasts, cs_tsfeatures)
   
   return(outs)
 }
 
 comptimes <- calculate_comptimes()
-save(comptimes, file = "data/comptimes.Rda") # Store as .Rda
+save(comptimes, file = "data/comptimes.Rda") # Store as .Rda as calculation time is massive
 
 #----------- Visualise performance --------------
 

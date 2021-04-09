@@ -10,11 +10,13 @@
 library(data.table)
 library(dplyr)
 library(magrittr)
+library(tidyr)
 library(ggplot2)
 library(scales)
 library(catch22) # devtools::install_github("hendersontrent/catch22")
 library(theft) # devtools::install_github("hendersontrent/theft")
 library(microbenchmark)
+library(Cairo)
 
 # Create important folders if none exist:
 
